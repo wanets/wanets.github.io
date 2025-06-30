@@ -1,133 +1,270 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Error 404</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inconsolata&display=swap" rel="stylesheet">
+  <meta charset="UTF-8" />
+  <title>W-404</title>
   <style>
-    html {
-      min-height: 100%;
+    html, body {
+      margin: 0;
+      overflow: hidden;
+      background: #000;
     }
 
-    body {
-      box-sizing: border-box;
-      height: 100%;
-      background-color: #000000;
-      background-image: radial-gradient(#11581E, #041607), url("https://media.giphy.com/media/oEI9uBYSzLpBK/giphy.gif");
-      background-repeat: no-repeat;
-      background-size: cover;
-      font-family: 'Inconsolata', Helvetica, sans-serif;
-      font-size: 1.5rem;
-      color: rgba(128, 255, 128, 0.8);
-      text-shadow:
-        0 0 1ex rgba(51, 255, 51, 1),
-        0 0 2px rgba(255, 255, 255, 0.8);
+    img {
+      position: fixed;
+      left: 0;
+      top: 0;
+      width: auto;
+      height: 100vh;
+      z-index: 0;
+      object-fit: cover;
     }
-
-    .noise {
-      pointer-events: none;
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      background-image: url("https://media.giphy.com/media/oEI9uBYSzLpBK/giphy.gif");
-      background-repeat: no-repeat;
-      background-size: cover;
-      z-index: -1;
-      opacity: .02;
-    }
-
-    .overlay {
-      pointer-events: none;
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      background:
-        repeating-linear-gradient(
-          180deg,
-          rgba(0, 0, 0, 0) 0,
-          rgba(0, 0, 0, 0.3) 50%,
-          rgba(0, 0, 0, 0) 100%);
-      background-size: auto 4px;
+    #canvas-wrapper {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw;
+      height: 100vh;
+      transform-style: preserve-3d;
+      perspective: 1000px;
+      transition: transform 3s ease-in-out;
       z-index: 1;
     }
 
-    .overlay::before {
-      content: "";
-      pointer-events: none;
-      position: absolute;
-      display: block;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
+    canvas {
       width: 100%;
       height: 100%;
-      background-image: linear-gradient(
-        0deg,
-        transparent 0%,
-        rgba(32, 128, 32, 0.2) 2%,
-        rgba(32, 128, 32, 0.8) 3%,
-        rgba(32, 128, 32, 0.2) 3%,
-        transparent 100%);
-      background-repeat: no-repeat;
-      animation: scan 7.5s linear 0s infinite;
+      display: block;
     }
-
-    @keyframes scan {
-      0%        { background-position: 0 -100vh; }
-      35%, 100% { background-position: 0 100vh; }
-    }
-
-    .terminal {
-      box-sizing: inherit;
-      position: absolute;
-      height: 100%;
-      width: 1000px;
-      max-width: 100%;
-      padding: 4rem;
-      text-transform: uppercase;
-    }
-
-    .output {
-      color: rgba(128, 255, 128, 0.8);
-      text-shadow:
-        0 0 1px rgba(51, 255, 51, 0.4),
-        0 0 2px rgba(255, 255, 255, 0.8);
-    }
-
-    .output::before {
-      content: "> ";
-    }
-
-    a {
-      color: #fff;
-      text-decoration: none;
-    }
-
-    a::before {
-      content: "[";
-    }
-
-    a::after {
-      content: "]";
-    }
-
-    .errorcode {
+    .d404MSG {
+      position: fixed;
+      top: 50%;
+      left: 10%;
+      transform: translateY(-50%);
       color: white;
+      font-family: 'Courier New', monospace;
+      font-size: 24px;
+      text-align: center;
+      z-index: 10;
+      background: rgb(37, 37, 37);
+      padding: 24px 32px;
+      border-radius: 8px;
+      box-shadow: 0 4px 24px #000a;
+      pointer-events: auto;
     }
   </style>
 </head>
 <body>
-  <div class="noise"></div>
-  <div class="overlay"></div>
-  <div class="terminal">
-    <h1>Error <span class="errorcode">404</span></h1>
-    <p class="output">The page you are looking for might have been removed, had its name changed or is temporarily unavailable. This might be my error, because I forgot to code this page!</p>
-    <p class="output">Please try to <a href="https://wanets.github.io/contact/pagenotfinished">Contact me</a> or <a href="https://wanets.github.io">return to the homepage</a>.</p>
-    <p class="output">Thanks to <a href="https://codepen.io/code2rithik">Rithik Samanthula</a> for the 404 page idea!</p>
+  <div class="d404MSG">
+    <p id="header">W-404 - Haven't Coded this page!</p>
+    <p id="directions">Should this page have content?</p>
+    <a id="report-link" style="color: rgb(43, 191, 55); text-decoration: underline;">Yes</a>
+    <a href="sitemap.html?searchbar=true" style="color: rgb(152, 207, 23); text-decoration: underline;">Did it move?</a>
+    <a href="index.html" style="color: rgb(166, 22, 22); text-decoration: underline;">Return to main page</a>
   </div>
+  <div id="canvas-wrapper">
+    <canvas id="voidCanvas"></canvas>
+  </div>
+
+  <script>
+    import newGithubIssueUrl from 'new-github-issue-url';
+    import open from 'open';
+  // Get elements
+  const reportLink = document.getElementById('report-link');
+  const ReportTitle = document.getElementById('header');
+  const ReportDesc = document.getElementById('directions');
+  const currentUrl = window.location.href;
+
+  // Check if reporting
+  const urlObj = new URL(currentUrl);
+  const reportPage = urlObj.searchParams.get('report');
+
+  if (reportPage) {
+    // Reporting mode
+    ReportTitle.textContent = "Reporting " + reportPage;
+    ReportDesc.textContent = "Press YES again to confirm your report, any other link to cancel.";
+    
+
+  const url = newGithubIssueUrl({
+  	user: 'wanets',
+  	repo: 'wanets.github.io',
+  	body: '\n\n\n---\nPage should be avaiable:' + reportPage,
+  });
+    reportLink.href = url;
+  } else {
+    // Not reporting yet, set YES link to add ?report=...
+    reportLink.href = "404.html?report=" + encodeURIComponent(currentUrl);
+  }
+
+  const canvas = document.getElementById("voidCanvas");
+  const ctx = canvas.getContext("2d");
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  const wrapper = document.getElementById("canvas-wrapper");
+
+  window.addEventListener("resize", () => {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  });
+
+  const htmlSnippets = [
+    "<div class=\"main\">",
+    "<meta charset=\"UTF-8\">",
+    "<script src=\"particles.js\">",
+    "<link rel=\"index.css\">",
+    "<section id=\"flow\">"
+  ];
+
+  const jsSnippets = [
+    "console.log('Process Finished');",
+    "setTimeout(() => redirect(home), 4000);",
+    "document.body.remove();",
+    "fetch('/assets/cat.png')",
+    "let LoggedIn = true;"
+  ];
+
+  const symbols = ["#", "&", "$", "@", "~", "*", "!", "∞", "∆", "µ", "¤", "†"];
+
+  const anomalies = [
+    "[VS Code] | index.html |",
+    "[ERROR] Line 51: Cannot read property 'x'",
+    "[CrashDump] code.js: Unexpected token '<'",
+    "[VS Code] Terminal: npm run dev",
+    "[StackTrace] at memory:0xDEAD"
+  ];
+
+  const randomSymbols = () => Array.from({length: 10 + Math.random()*10}, () => symbols[Math.floor(Math.random() * symbols.length)]).join("");
+
+  function getTextForPhase(phase, isAnomaly) {
+    if (isAnomaly) {
+      if (phase === 0) return anomalies[Math.floor(Math.random() * anomalies.length)];
+    }
+
+    if (phase === 0) return htmlSnippets[Math.floor(Math.random() * htmlSnippets.length)];
+    if (phase === 1) return jsSnippets[Math.floor(Math.random() * jsSnippets.length)];
+    return randomSymbols();
+  }
+
+  function createParticle(forceAnomaly = false) {
+    const directions = [
+      {x: 0, y: -1}, {x: 0, y: 1}, {x: -1, y: 0}, {x: 1, y: 0}
+    ];
+    const dir = directions[Math.floor(Math.random() * directions.length)];
+    const size = Math.random() * 1.5 + 1.5;
+    const lifeSpan = 200 + Math.random() * 100;
+    const isAnomaly = forceAnomaly || Math.random() < 0.01;
+
+    return {
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height,
+      vx: dir.x * (Math.random() * 0.7 + 0.3),
+      vy: dir.y * (Math.random() * 0.7 + 0.3),
+      size,
+      phase: 0,
+      tick: 0,
+      lifeSpan,
+      isAnomaly,
+      text: getTextForPhase(0, isAnomaly),
+      snapFragments: null
+    };
+  }
+
+  let particles = [];
+
+  function drawSnap(p) {
+    if (!p.snapFragments) {
+      p.snapFragments = [];
+      for (let i = 0; i < p.text.length; i++) {
+        const char = p.text[i];
+        p.snapFragments.push({
+          char,
+          x: p.x + i * (p.size * 7),
+          y: p.y,
+          alpha: 1,
+          vx: (Math.random() - 0.5) * 2,
+          vy: (Math.random() - 0.5) * 2
+        });
+      }
+    }
+
+    for (const frag of p.snapFragments) {
+      frag.x += frag.vx;
+      frag.y += frag.vy;
+      frag.alpha -= 0.02;
+
+      ctx.globalAlpha = Math.max(0, frag.alpha);
+      ctx.font = `${p.size}px Courier New`;
+      ctx.fillStyle = `rgba(255,0,0,${frag.alpha})`;
+      ctx.fillText(frag.char, frag.x, frag.y);
+    }
+
+    ctx.globalAlpha = 1;
+  }
+
+  function animate() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    if (Math.random() < 0.3 && particles.length < 200) {
+      particles.push(createParticle());
+    }
+
+    for (let i = 0; i < particles.length; i++) {
+      const p = particles[i];
+      p.tick++;
+
+      if (p.phase < 3) {
+        p.x += p.vx;
+        p.y += p.vy;
+      }
+
+      if (p.tick === 80) { p.phase = 1; p.text = getTextForPhase(1, p.isAnomaly); }
+      if (p.tick === 160) { p.phase = 2; p.text = getTextForPhase(2, p.isAnomaly); }
+      if (p.tick >= p.lifeSpan) { p.phase = 3; }
+
+      if (p.phase === 3) {
+        drawSnap(p);
+        if (p.snapFragments && p.snapFragments.every(f => f.alpha <= 0)) {
+          particles[i] = createParticle();
+        }
+        continue;
+      }
+
+      const scale = 1 - (p.tick / p.lifeSpan);
+      const fontSize = p.size * scale * 10;
+
+      ctx.globalAlpha = scale;
+      ctx.font = `${fontSize}px Courier New`;
+      ctx.fillStyle = p.isAnomaly ? `rgba(255,50,50,${scale})` : `rgba(0,255,100,${scale})`;
+      ctx.fillText(p.text, p.x, p.y);
+      ctx.globalAlpha = 1;
+
+      if (
+        p.x < -300 || p.x > canvas.width + 300 ||
+        p.y < -300 || p.y > canvas.height + 300
+      ) {
+        particles[i] = createParticle();
+      }
+    }
+
+    requestAnimationFrame(animate);
+  }
+
+  animate();
+
+  // 🌀 Perspective warp every 5 seconds
+  function randomTransform() {
+    const rotX = (Math.random() - 0.5) * 50;
+    const rotY = (Math.random() - 0.5) * 50;
+    const scale = 1 + (Math.random() - 0.5) * 0.3;
+
+    wrapper.style.transform = `
+      perspective(1200px)
+      rotateX(${rotX}deg)
+      rotateY(${rotY}deg)
+      scale3d(${scale}, ${scale}, 1)
+    `;
+  }
+  setInterval(randomTransform, 5000);
+  randomTransform(); // Initial
+  </script>
 </body>
 </html>
