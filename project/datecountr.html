@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="shortcut icon" href="https://wanets.me/WanetsLogo.png" type="image/x-icon">
+  <title>DateCountr</title>
+  <style>
+    :root {
+      --primary: #00bcd4;
+      --bg-dark: #202020;
+      --bg-card: #2d2d2d;
+      --text-main: #ffffff;
+      --text-muted: #a7a7a7;
+      --border-color: rgba(255, 255, 255, 0.1);
+      --success: #28a745;
+      --radius: 8px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      padding: 20px;
+      display: flex;
+      justify-content: center;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    .container {
+      max-width: 800px;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+      padding-bottom: 50px;
+      z-index: 2;
+      position: relative;
+    }
+
+    h1 { color: var(--primary); text-align: center; margin-bottom: 0.5rem; }
+    h4 { color: var(--text-muted); text-align: center; font-weight: 400; margin-bottom: 1rem; }
+    h2 { font-size: 1.2rem; text-align: center; margin-bottom: 1rem; }
+    .divider { height: 1px; background-color: var(--border-color); width: 100%; margin: 10px 0; }
+
+    .section-card {
+      background: var(--bg-card);
+      padding: 2rem;
+      border-radius: var(--radius);
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1rem;
+      transition: opacity 0.5s;
+    }
+
+    input[type="datetime-local"] {
+      background: rgba(0, 0, 0, 0.2);
+      border: 1px solid var(--border-color);
+      color: var(--primary);
+      padding: 15px;
+      font-size: 1.2rem;
+      border-radius: var(--radius);
+      outline: none;
+      width: 100%;
+      max-width: 400px;
+      text-align: center;
+      cursor: pointer;
+    }
+
+    .quick-links {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 10px;
+      width: 100%;
+    }
+    .quick-link-btn {
+      padding: 12px;
+      background: rgba(0, 188, 212, 0.1);
+      color: var(--primary);
+      border: 1px solid transparent;
+      border-radius: var(--radius);
+      font-size: 0.9rem;
+      cursor: pointer;
+    }
+    .quick-link-btn:hover { background: rgba(0, 188, 212, 0.2); border-color: rgba(0, 188, 212, 0.3); }
+
+    .video-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      width: 100%;
+    }
+    @media (max-width: 768px) { .video-grid { grid-template-columns: 1fr; } }
+
+    .upload-area, .settings-area {
+      background: rgba(255, 255, 255, 0.03);
+      padding: 1.5rem;
+      border-radius: var(--radius);
+      border: 1px solid var(--border-color);
+    }
+    
+    input[type="file"] { display: none; }
+    .custom-file-btn {
+      background-color: var(--primary);
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: var(--radius);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 0 auto;
+    }
+    
+    .file-name { display: block; text-align: center; margin-top: 10px; font-size: 0.9rem; color: var(--text-muted); }
+
+    .video-preview-box {
+      margin-top: 15px;
+      width: 100%;
+      min-height: 200px;
+      background: rgba(0,0,0,0.3);
+      border: 1px dashed var(--border-color);
+      border-radius: var(--radius);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      position: relative;
+    }
+    .video-preview-box video { width: 100%; height: 100%; object-fit: contain; }
+
+    .setting-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border-color);
+    }
+    input[type="checkbox"] { accent-color: var(--primary); transform: scale(1.2); }
+    input[type="text"] {
+      background: rgba(0,0,0,0.3);
+      border: 1px solid var(--border-color);
+      color: white;
+      padding: 5px 10px;
+      border-radius: 4px;
+      width: 100px;
+      text-align: center;
+    }
+
+    .countdown-display {
+      display: none;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-top: 20px;
+      text-align: center;
+      width: 100%;
+    }
+    .cd-block {
+      background: rgba(0,0,0,0.4);
+      padding: 15px;
+      border-radius: var(--radius);
+      border: 1px solid var(--primary);
+    }
+    .cd-number { font-size: 2rem; font-weight: bold; color: white; display: block; }
+    .cd-label { font-size: 0.8rem; color: var(--primary); text-transform: uppercase; }
+
+    .big-btn {
+      width: 100%;
+      padding: 20px;
+      font-size: 1.5rem;
+      font-weight: bold;
+      border: none;
+      border-radius: var(--radius);
+      cursor: pointer;
+      margin-top: 20px;
+    }
+    .btn-start { background-color: var(--success); color: white; }
+    .btn-stop { background-color: var(--text-muted); color: #333; }
+    
+    details { margin-top: 15px; background: rgba(0, 0, 0, 0.2); border-radius: var(--radius); padding: 10px; font-size: 0.9rem; color: var(--text-muted); }
+
+    #finishOverlay {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.9);
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+    }
+    #finishText {
+      font-size: 4rem;
+      color: var(--primary);
+      text-transform: uppercase;
+      font-weight: bold;
+      animation: pulse 1s infinite;
+      text-shadow: 0 0 20px var(--primary);
+      text-align: center;
+      padding: 20px;
+    }
+    #finishSub { color: white; font-size: 1.5rem; margin-top: 10px; }
+    
+    .video-fullscreen {
+      position: fixed !important;
+      top: 0; left: 0; width: 100% !important; height: 100% !important;
+      z-index: 200;
+      background: black;
+    }
+
+    #confettiCanvas {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      pointer-events: none; z-index: 99; display: none;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
+    }
+  </style>
+</head>
+<body>
+
+  <canvas id="confettiCanvas"></canvas>
+
+  <div id="finishOverlay">
+    <h1 id="finishText">Countdown Finished</h1>
+    <p id="finishSub">Powered by DateCountr by Wanets</p>
+    <button onclick="location.reload()" class="quick-link-btn" style="margin-top: 30px; background:white; color:black;">Reset</button>
+  </div>
+
+  <div class="container">
+    <header>
+      <h1>DateCountr</h1>
+      <h4>A simple countdown to an event, launch, or holiday.</h4>
+    </header>
+
+    <div class="divider"></div>
+
+    <section class="section-card">
+      <h2 id="statusTitle">Configure Countdown</h2>
+      
+      <input type="datetime-local" id="dateInput">
+      
+      <div class="quick-links">
+        <button type="button" class="quick-link-btn" onclick="setPreset('newYear')">Set to “New Year”</button>
+        <button type="button" class="quick-link-btn" onclick="setPreset('lunarYear')">Set to “Lunar New Year”</button>
+        <button type="button" class="quick-link-btn" onclick="setPreset('tomorrowStart')">Set to “Tomorrow 00:00”</button>
+      </div>
+
+      <div id="countdownUI" class="countdown-display">
+        <div class="cd-block"><span class="cd-number" id="dDays">00</span><span class="cd-label">Days</span></div>
+        <div class="cd-block"><span class="cd-number" id="dHours">00</span><span class="cd-label">Hours</span></div>
+        <div class="cd-block"><span class="cd-number" id="dMins">00</span><span class="cd-label">Mins</span></div>
+        <div class="cd-block"><span class="cd-number" id="dSecs">00</span><span class="cd-label">Secs</span></div>
+      </div>
+
+      <button id="mainActionBtn" class="big-btn btn-start">Start Countdown</button>
+    </section>
+
+    <div class="divider"></div>
+
+    <section class="section-card">
+      <h2>Ending Animation (Optional)</h2>
+      
+      <div class="video-grid">
+        <div class="upload-area">
+          <div style="text-align:center; margin-bottom:10px;"><img src="https://api.iconify.design/lucide-video.svg?color=%2300bcd4" width="24"></div>
+          
+          <input type="file" id="videoFile" accept="video/*">
+          <button type="button" id="btnChooseVideo" class="custom-file-btn">Choose Video</button>
+          <span id="fileNameDisplay" class="file-name">No file chosen</span>
+
+          <div class="video-preview-box" id="videoContainer">
+            <span style="color:var(--text-muted); font-size: 0.9rem;">Preview area</span>
+          </div>
+        </div>
+
+        <div class="settings-area">
+          <div class="setting-row">
+            <label for="checkFinishAtEnd">Finish video exactly when countdown ends</label>
+            <input type="checkbox" id="checkFinishAtEnd" onchange="toggleSettings()">
+          </div>
+
+          <div class="setting-row">
+            <label for="checkCustomStamp">Use custom timestamp offset</label>
+            <input type="checkbox" id="checkCustomStamp" onchange="toggleSettings()">
+          </div>
+
+          <div class="setting-row">
+            <label>Timestamp in Video (HH:MM:SS):</label>
+            <input type="text" id="timeOffset" placeholder="00:00:00" disabled>
+          </div>
+
+          <details>
+            <summary>How does this work?</summary>
+            If you set a custom timestamp (e.g., 00:01:30), the video will automatically start playing 1 minute and 30 seconds <em>before</em> the countdown hits zero.
+          </details>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    let intervalId = null;
+    let isRunning = false;
+    let videoHasPlayed = false;
+    let videoDuration = 0;
+
+    const dateInput = document.getElementById('dateInput');
+    const startBtn = document.getElementById('mainActionBtn');
+    const countdownUI = document.getElementById('countdownUI');
+    const statusTitle = document.getElementById('statusTitle');
+    const videoFile = document.getElementById('videoFile');
+    const btnChooseVideo = document.getElementById('btnChooseVideo');
+    const fileNameDisplay = document.getElementById('fileNameDisplay');
+    const videoContainer = document.getElementById('videoContainer');
+    const finishOverlay = document.getElementById('finishOverlay');
+    const confettiCanvas = document.getElementById('confettiCanvas');
+    let videoEl = null;
+
+    const checkFinishAtEnd = document.getElementById('checkFinishAtEnd');
+    const checkCustomStamp = document.getElementById('checkCustomStamp');
+    const timeOffsetInput = document.getElementById('timeOffset');
+
+    function setPreset(type) {
+      const now = new Date();
+      let target = new Date();
+      if(type === 'newYear') { target.setFullYear(now.getFullYear() + 1, 0, 1); target.setHours(0,0,0,0); }
+      else if(type === 'lunarYear') { alert("Sorry, our moon-api.com API quota exceeded, please resort to looking up the next lunar year date and typing it in manually. Thank you!")
+       }
+      else if(type === 'tomorrowStart') { target.setDate(now.getDate() + 1); target.setHours(0,0,0,0); }
+      
+      const offset = target.getTimezoneOffset() * 60000;
+      dateInput.value = (new Date(target - offset)).toISOString().slice(0, 16);
+    }
+
+    btnChooseVideo.addEventListener('click', () => videoFile.click());
+    
+    videoFile.addEventListener('change', function() {
+      const file = this.files[0];
+      if (file) {
+        fileNameDisplay.textContent = file.name;
+        const url = URL.createObjectURL(file);
+        videoContainer.innerHTML = '';
+        
+        videoEl = document.createElement('video');
+        videoEl.src = url;
+        videoEl.controls = true;
+        videoEl.playsInline = true; 
+        videoEl.setAttribute('playsinline', '');
+        
+        videoContainer.appendChild(videoEl);
+
+        videoEl.onloadedmetadata = function() { videoDuration = videoEl.duration; };
+      }
+    });
+
+    function toggleSettings() {
+      if(checkFinishAtEnd.checked) { checkCustomStamp.checked = false; timeOffsetInput.disabled = true; } 
+      else if (checkCustomStamp.checked) { checkFinishAtEnd.checked = false; timeOffsetInput.disabled = false; } 
+      else { timeOffsetInput.disabled = true; }
+    }
+
+    function parseOffset(str) {
+      if(!str) return 0;
+      const parts = str.split(':').map(Number);
+      if(parts.length === 3) return (parts[0]*3600) + (parts[1]*60) + parts[2];
+      if(parts.length === 2) return (parts[0]*60) + parts[1];
+      return parts[0];
+    }
+
+    startBtn.addEventListener('click', () => {
+      if(isRunning) { location.reload(); }
+      else { startCountdown(); }
+    });
+
+    function startCountdown() {
+      const targetTime = new Date(dateInput.value).getTime();
+      if(isNaN(targetTime) || targetTime < Date.now()) {
+        alert("Please set a valid date in the future.");
+        return;
+      }
+
+      isRunning = true;
+      videoHasPlayed = false;
+      startBtn.textContent = "Stop / Reset";
+      startBtn.classList.replace('btn-start', 'btn-stop');
+      statusTitle.textContent = "Countdown Running...";
+      countdownUI.style.display = "grid";
+      dateInput.disabled = true;
+
+      if(videoEl) {
+        videoEl.play().then(() => {
+          videoEl.pause();
+          videoEl.currentTime = 0;
+        }).catch(e => console.log("Autoplay prime failed:", e));
+      }
+
+      let secondsOffset = 0;
+      if(checkFinishAtEnd.checked && videoEl) secondsOffset = videoDuration;
+      else if(checkCustomStamp.checked && videoEl) secondsOffset = parseOffset(timeOffsetInput.value);
+
+      intervalId = setInterval(() => {
+        const now = Date.now();
+        const diff = targetTime - now;
+        const diffSec = diff / 1000;
+
+        if(videoEl && !videoHasPlayed && diffSec <= secondsOffset && diffSec > secondsOffset - 1) {
+          videoEl.classList.add('video-fullscreen');
+          videoEl.play().catch(e => console.error("Play failed", e));
+          videoHasPlayed = true;
+        }
+
+        if (diff <= 0) {
+          clearInterval(intervalId);
+          finishEvent();
+          return;
+        }
+        updateDisplay(diff);
+      }, 100);
+    }
+
+    function finishEvent() {
+      updateDisplay(0);
+      statusTitle.textContent = "Finished!";
+      
+      if(!videoEl) {
+        startConfetti();
+        finishOverlay.style.display = "flex";
+      } else {
+        if(!videoHasPlayed) {
+          videoEl.classList.add('video-fullscreen');
+          videoEl.play();
+        }
+      }
+    }
+
+    function updateDisplay(ms) {
+      if(ms < 0) ms = 0;
+      const d = Math.floor(ms / (1000 * 60 * 60 * 24));
+      const h = Math.floor((ms % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const m = Math.floor((ms % (1000 * 60 * 60)) / (1000 * 60));
+      const s = Math.floor((ms % (1000 * 60)) / 1000);
+
+      document.getElementById('dDays').innerText = String(d).padStart(2, '0');
+      document.getElementById('dHours').innerText = String(h).padStart(2, '0');
+      document.getElementById('dMins').innerText = String(m).padStart(2, '0');
+      document.getElementById('dSecs').innerText = String(s).padStart(2, '0');
+    }
+
+    function startConfetti() {
+      confettiCanvas.style.display = 'block';
+      const ctx = confettiCanvas.getContext('2d');
+      confettiCanvas.width = window.innerWidth;
+      confettiCanvas.height = window.innerHeight;
+      
+      const particles = [];
+      const colors = ['#00bcd4', '#ffeb3b', '#ff5722', '#4caf50', '#ffffff'];
+      
+      for(let i=0; i<300; i++) {
+        particles.push({
+          x: Math.random() * confettiCanvas.width,
+          y: Math.random() * confettiCanvas.height - confettiCanvas.height,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          size: Math.random() * 8 + 2,
+          speedY: Math.random() * 5 + 2,
+          speedX: Math.random() * 4 - 2
+        });
+      }
+
+      function draw() {
+        ctx.clearRect(0,0, confettiCanvas.width, confettiCanvas.height);
+        particles.forEach(p => {
+          ctx.fillStyle = p.color;
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.size, 0, Math.PI*2);
+          ctx.fill();
+          p.y += p.speedY;
+          p.x += p.speedX;
+          if(p.y > confettiCanvas.height) p.y = -10;
+        });
+        requestAnimationFrame(draw);
+      }
+      draw();
+    }
+  </script>
+</body>
+</html>
