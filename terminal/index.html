@@ -60,6 +60,9 @@
     <pre id="screen">Loading…</pre>
 </div>
 <script>
+    if (!navigator.userAgent || navigator.userAgent.toLowerCase().includes("curl")) {
+    window.location.href = "https://terminal.mrman6547.workers.dev";
+    }
 (async function () {
     const screen = document.getElementById("screen");
     const frames = [];
