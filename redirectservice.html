@@ -1,18 +1,25 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Closing...</title>
-</head>
+<html>
+<head><title>Authorizing...</title></head>
 <body>
-    <p>You are now logged in!</p><br>
-    <p>This page should close automatically. If it doesn't succeed try closing it yourself.</p>
-    <script>
-        // Attempt to close the window immediately
-        window.close();
+<script>
+  const params = new URLSearchParams(window.location.search);
+  const code = params.get('code');
+  const state = params.get('state');
+  const error = params.get('error');
+  const error_description = params.get('error_description');
 
-        // Fallback note: Modern browsers only allow window.close() 
-        // on windows/tabs that were opened by a script (using window.open()).
-    </script>
+  if (window.opener) {
+    window.opener.postMessage({
+      type: 'wynncraft_auth_success',
+      code,
+      state,
+      error,
+      error_description
+    }, "127.0.0.1:443");
+  }
+  
+  window.close();
+</script>
 </body>
 </html>
